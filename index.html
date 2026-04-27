@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InSight</title>
+<style>
+  :root {
+    --primary: #5B4FE8;
+    --primary-dark: #4438D1;
+    --primary-light: #7B70F0;
+    --accent: #25D366;
+    --accent2: #F59E0B;
+    --danger: #EF4444;
+    --neutral: #F59E0B;
+    --positive: #22C55E;
+    --negative: #EF4444;
+    --bg: #F0F2FF;
+    --surface: #FFFFFF;
+    --sidebar: #FAFAFA;
+    --text: #0F0F1A;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --shadow: 0 4px 24px rgba(91,79,232,0.10);
+    --shadow-lg: 0 12px 40px rgba(91,79,232,0.16);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+ 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+ 
+  /* ===== PAGES ===== */
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: block; }
+ 
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideRight {
+    from { opacity: 0; transform: translateX(-24px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.07); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes progressBar {
+    from { width: 0%; }
+    to { width: var(--w); }
+  }
+ 
+  .anim-fade-up { animation: fadeUp 0.55s cubic-bezier(.22,.68,0,1.2) forwards; }
+  .anim-fade-up:nth-child(2) { animation-delay: 0.08s; }
+  .anim-fade-up:nth-child(3) { animation-delay: 0.16s; }
+  .anim-fade-up:nth-child(4) { animation-delay: 0.24s; }
+  .anim-fade-up:nth-child(5) { animation-delay: 0.32s; }
+ 
+  /* ===== NAVBAR ===== */
+  .navbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(91,79,232,0.08);
+    transition: box-shadow 0.3s;
+  }
+  .navbar.scrolled { box-shadow: 0 4px 28px rgba(91,79,232,0.10); }
+ 
+  .nav-logo { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+  .nav-logo-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 20px; box-shadow: 0 4px 14px rgba(91,79,232,0.35);
+  }
+  .nav-logo-text { font-family: Arial, sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--text); }
+  .nav-logo-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: -2px; }
+ 
+  .nav-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 22px; border-radius: 50px;
+    border: 2px solid var(--primary);
+    background: transparent; color: var(--primary);
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem;
+    cursor: pointer; transition: all 0.25s;
+  }
+  .nav-btn:hover { background: var(--primary); color: white; transform: translateY(-1px); }
+ 
+  /* ===== LANDING PAGE ===== */
+  #landing {
+    background: var(--bg);
+    position: relative;
+  }
+ 
+  .hero {
+    padding: 140px 48px 80px;
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  }
+ 
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(91,79,232,0.10); color: var(--primary);
+    border: 1px solid rgba(91,79,232,0.2);
+    padding: 8px 16px; border-radius: 50px;
+    font-size: 0.85rem; font-weight: 600; margin-bottom: 28px;
+    animation: fadeUp 0.5s ease forwards;
+  }
+ 
+  .hero h1 {
+    font-family: Arial, sans-serif;
+    font-size: 3.6rem; font-weight: 800; line-height: 1.1;
+    color: var(--text); margin-bottom: 20px;
+    animation: fadeUp 0.55s 0.08s ease both;
+  }
+  .hero h1 span { color: var(--primary); }
+ 
+  .hero-sub {
+    font-size: 1.05rem; color: var(--text-muted);
+    line-height: 1.7; margin-bottom: 40px;
+    animation: fadeUp 0.55s 0.16s ease both;
+    max-width: 480px;
+  }
+ 
+  .hero-buttons {
+    display: flex; flex-direction: column; gap: 14px;
+    animation: fadeUp 0.55s 0.24s ease both;
+  }
+ 
+  .btn-whatsapp {
+    display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+    background: var(--accent); color: white;
+    padding: 18px 36px; border-radius: 50px;
+    font-family: Arial, sans-serif; font-weight: 700; font-size: 1.05rem;
+    border: none; cursor: pointer;
+    box-shadow: 0 8px 28px rgba(37,211,102,0.35);
+    transition: all 0.3s; text-decoration: none;
+    max-width: 340px;
+  }
+  .btn-whatsapp:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(37,211,102,0.45); background: #1EB855; }
+ 
+  .btn-whatsapp svg { transition: transform 0.3s; }
+  .btn-whatsapp:hover svg { transform: scale(1.15) rotate(-5deg); }
+ 
+  .btn-hint {
+    font-size: 0.78rem; color: var(--text-muted);
+    display: flex; align-items: center; gap: 6px; padding-left: 6px;
+  }
+ 
+  /* Hero mockup card */
+  .hero-visual {
+    animation: fadeUp 0.65s 0.2s ease both;
+    position: relative;
+  }
+ 
+  .mockup-card {
+    background: white; border-radius: 20px;
+    padding: 28px; box-shadow: var(--shadow-lg);
+    position: relative; overflow: hidden;
+    animation: float 4s ease-in-out infinite;
+  }
+  .mockup-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--primary));
+  }
+ 
+  .mockup-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  }
+  .mockup-icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(37,211,102,0.15);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); font-size: 22px;
+  }
+  .mockup-header-text { font-size: 0.78rem; color: var(--text-muted); }
+  .mockup-header-title { font-family: Arial, sans-serif; font-weight: 700; font-size: 1rem; }
+ 
+  .mockup-msg {
+    background: #F8F9FF; border-radius: 12px; padding: 16px 20px;
+    font-size: 0.92rem; color: var(--text-muted); margin-bottom: 16px;
+    border-left: 3px solid var(--primary);
+    font-style: italic;
+  }
+ 
+  .mockup-status {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(34,197,94,0.10); color: var(--positive);
+    padding: 12px 16px; border-radius: 10px;
+    font-weight: 600; font-size: 0.9rem;
+    animation: pulse 2s ease-in-out infinite;
+  }
+ 
+  .mockup-progress {
+    display: flex; gap: 6px; margin-top: 18px;
+  }
+  .mockup-bar {
+    height: 5px; border-radius: 3px; background: var(--accent);
+    --w: 33%;
+    animation: progressBar 1.5s ease forwards;
+  }
+  .mockup-bar:nth-child(2) { animation-delay: 0.3s; --w: 28%; }
+  .mockup-bar:nth-child(3) { animation-delay: 0.6s; --w: 25%; }
+  .mockup-bar:nth-child(4) { background: #E5E7EB; --w: 14%; animation: progressBar 1.5s 0.8s ease forwards; }
+ 
+  /* Floating badges */
+  .float-badge {
+    position: absolute;
+    background: white; border-radius: 12px;
+    padding: 10px 16px; box-shadow: var(--shadow);
+    font-size: 0.82rem; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    animation: float 3.5s ease-in-out infinite;
+  }
+  .float-badge-1 { top: -20px; right: -20px; animation-delay: 0.5s; color: var(--positive); }
+  .float-badge-2 { bottom: -10px; left: -20px; animation-delay: 1s; color: var(--primary); }
+ 
+  /* Features section */
+  .features {
+    padding: 80px 48px; max-width: 1200px; margin: 0 auto;
+  }
+  .features-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  }
+  .feature-card {
+    background: white; border-radius: var(--radius);
+    padding: 32px; border: 1px solid var(--border);
+    transition: all 0.3s; position: relative; overflow: hidden;
+  }
+  .feature-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    transform: scaleX(0); transition: transform 0.3s; transform-origin: left;
+  }
+  .feature-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+  .feature-card:hover::after { transform: scaleX(1); }
+ 
+  .feature-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; margin-bottom: 20px;
+  }
+  .feature-icon.purple { background: rgba(91,79,232,0.12); }
+  .feature-icon.green { background: rgba(37,211,102,0.12); }
+  .feature-icon.orange { background: rgba(245,158,11,0.12); }
+ 
+  .feature-card h3 {
+    font-family: Arial, sans-serif; font-weight: 700; font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+  .feature-card p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; }
+ 
+  /* CTA Banner */
+  .cta-banner {
+    margin: 0 48px 80px; border-radius: 24px;
+    background: linear-gradient(135deg, var(--primary) 0%, #8B5CF6 50%, #7C3AED 100%);
+    padding: 64px; text-align: center; position: relative; overflow: hidden;
+  }
+  .cta-banner::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(255,255,255,0.08) 0%, transparent 60%);
+  }
+  .cta-banner * { position: relative; }
+  .cta-banner h2 {
+    font-family: Arial, sans-serif; font-weight: 800;
+    font-size: 2.4rem; color: white; margin-bottom: 12px;
+  }
+  .cta-banner p { color: rgba(255,255,255,0.8); font-size: 1.05rem; margin-bottom: 36px; }
+  .btn-cta-white {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: white; color: var(--primary);
+    padding: 16px 36px; border-radius: 50px;
+    font-family: Arial, sans-serif; font-weight: 700; font-size: 1rem;
+    border: none; cursor: pointer; transition: all 0.3s;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+  }
+  .btn-cta-white:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 36px rgba(0,0,0,0.25); }
+ 
+  /* ===== APP LAYOUT ===== */
+  #app {
+    display: none;
+    min-height: 100vh;
+  }
+  #app.active { display: flex; }
+ 
+  .sidebar {
+    width: 240px; min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 28px 20px;
+    position: fixed; left: 0; top: 0; bottom: 0;
+    z-index: 100;
+  }
+ 
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 36px; padding: 0 6px;
+  }
+  .sidebar-logo-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 17px;
+  }
+  .sidebar-logo-text { font-family: Arial, sans-serif; font-weight: 800; font-size: 1.05rem; }
+  .sidebar-logo-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: -2px; }
+ 
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    color: var(--text-muted); font-weight: 500; font-size: 0.92rem;
+    cursor: pointer; transition: all 0.2s; margin-bottom: 4px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--bg); color: var(--primary); }
+  .nav-item.active { background: rgba(91,79,232,0.10); color: var(--primary); font-weight: 600; }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+ 
+  .nav-item-badge {
+    margin-left: auto;
+    background: var(--negative); color: white;
+    font-size: 0.7rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 50px;
+  }
+ 
+  .sidebar-bottom { margin-top: auto; }
+  .btn-logout {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; border-radius: 12px;
+    color: var(--text-muted); font-weight: 500; font-size: 0.92rem;
+    cursor: pointer; transition: all 0.2s; background: none; border: none; width: 100%;
+  }
+  .btn-logout:hover { background: #FEF2F2; color: var(--danger); }
+ 
+  .main-content {
+    flex: 1; margin-left: 240px;
+    padding: 40px 40px; min-height: 100vh;
+    background: var(--bg);
+  }
+ 
+  .page-header { margin-bottom: 32px; animation: fadeUp 0.4s ease; }
+  .page-header h1 { font-family: Arial, sans-serif; font-weight: 800; font-size: 1.9rem; }
+  .page-header p { color: var(--text-muted); margin-top: 6px; font-size: 0.92rem; }
+ 
+  /* Sub-pages */
+  .sub-page { display: none; animation: fadeIn 0.3s ease; }
+  .sub-page.active { display: block; }
+ 
+  /* ===== DASHBOARD ===== */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px;
+  }
+  .stat-card {
+    background: white; border-radius: var(--radius);
+    padding: 24px; border: 1px solid var(--border);
+    box-shadow: var(--shadow); transition: all 0.3s;
+    animation: fadeUp 0.5s ease both;
+  }
+  .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+ 
+  .stat-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+  }
+  .stat-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .stat-trend { font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .trend-up { color: var(--positive); }
+  .trend-down { color: var(--danger); }
+ 
+  .stat-value { font-family: Arial, sans-serif; font-weight: 800; font-size: 2rem; margin-bottom: 4px; }
+  .stat-label { font-size: 0.82rem; color: var(--text-muted); }
+ 
+  .charts-grid {
+    display: grid; grid-template-columns: 1fr 1.4fr; gap: 20px;
+  }
+  .chart-card {
+    background: white; border-radius: var(--radius);
+    padding: 28px; border: 1px solid var(--border); box-shadow: var(--shadow);
+    animation: fadeUp 0.5s 0.2s ease both;
+  }
+  .chart-card h3 { font-family: Arial, sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 24px; }
+ 
+  /* Donut chart */
+  .donut-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+  }
+  .donut-svg { animation: fadeIn 0.8s 0.3s ease both; }
+  .donut-legend {
+    display: flex; gap: 20px; justify-content: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+ 
+  /* Bar chart */
+  .bar-chart { display: flex; align-items: flex-end; gap: 10px; height: 160px; padding-bottom: 24px; position: relative; }
+  .bar-chart::after {
+    content: ''; position: absolute; bottom: 24px; left: 0; right: 0; height: 1px;
+    background: var(--border);
+  }
+  .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar {
+    width: 100%; border-radius: 6px 6px 0 0;
+    transition: opacity 0.3s;
+    animation: progressBar 0.8s ease forwards;
+  }
+  .bar:hover { opacity: 0.8; }
+  .bar-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 8px; }
+ 
+  /* ===== FEEDBACKS ===== */
+  .search-bar {
+    display: flex; gap: 12px; margin-bottom: 24px; align-items: center;
+  }
+  .search-input-wrap {
+    flex: 1; position: relative;
+  }
+  .search-input-wrap svg {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted);
+  }
+  .search-input {
+    width: 100%; padding: 14px 16px 14px 48px;
+    border: 1.5px solid var(--border); border-radius: 50px;
+    background: white; font-family: 'DM Sans', sans-serif; font-size: 0.92rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--primary); }
+  .btn-filter {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 22px; border-radius: 50px;
+    border: 1.5px solid var(--border); background: white;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem;
+    cursor: pointer; transition: all 0.2s; color: var(--text);
+  }
+  .btn-filter:hover { border-color: var(--primary); color: var(--primary); }
+ 
+  .feedback-list { display: flex; flex-direction: column; gap: 12px; }
+  .feedback-item {
+    background: white; border-radius: var(--radius);
+    padding: 20px 24px; border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; transition: all 0.25s;
+    animation: fadeUp 0.4s ease both;
+  }
+  .feedback-item:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateX(4px); }
+ 
+  .feedback-item-left { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .feedback-item-name {
+    font-family: Arial, sans-serif; font-weight: 700; font-size: 1rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+ 
+  .tag {
+    padding: 3px 12px; border-radius: 50px;
+    font-size: 0.75rem; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  }
+  .tag-positivo { background: rgba(34,197,94,0.12); color: var(--positive); }
+  .tag-negativo { background: rgba(239,68,68,0.12); color: var(--negative); }
+  .tag-neutro { background: rgba(245,158,11,0.12); color: var(--neutral); }
+  .tag-type { background: var(--bg); color: var(--text-muted); }
+ 
+  .feedback-msg { font-size: 0.88rem; color: var(--text-muted); }
+  .feedback-date { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+ 
+  .sentiment-icon { font-size: 26px; flex-shrink: 0; margin-left: 16px; }
+ 
+  /* ===== DETAIL PAGE ===== */
+  .detail-back {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--primary); font-weight: 600; cursor: pointer;
+    margin-bottom: 24px; background: none; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.92rem;
+    transition: gap 0.2s;
+  }
+  .detail-back:hover { gap: 12px; }
+ 
+  .detail-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+ 
+  .detail-card {
+    background: white; border-radius: var(--radius);
+    padding: 28px; border: 1px solid var(--border); box-shadow: var(--shadow);
+  }
+  .detail-card h3 { font-family: Arial, sans-serif; font-weight: 700; margin-bottom: 20px; font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem; }
+ 
+  .detail-message-box {
+    background: var(--bg); border-radius: 12px; padding: 20px;
+    font-size: 0.95rem; line-height: 1.7; color: var(--text);
+    border-left: 4px solid var(--primary); font-style: italic; margin-bottom: 20px;
+  }
+ 
+  .detail-meta { display: flex; flex-direction: column; gap: 12px; }
+  .detail-meta-row { display: flex; justify-content: space-between; align-items: center; }
+  .detail-meta-label { font-size: 0.82rem; color: var(--text-muted); }
+  .detail-meta-value { font-weight: 600; font-size: 0.9rem; }
+ 
+  .sentiment-big {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 12px; padding: 32px;
+    background: var(--bg); border-radius: 16px; text-align: center; margin-bottom: 20px;
+  }
+  .sentiment-emoji { font-size: 56px; }
+  .sentiment-label { font-family: Arial, sans-serif; font-weight: 800; font-size: 1.3rem; }
+ 
+  .confidence-bar-wrap { margin-bottom: 8px; }
+  .confidence-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; }
+  .confidence-bar-bg { height: 8px; background: var(--bg); border-radius: 50px; overflow: hidden; }
+  .confidence-bar-fill { height: 100%; border-radius: 50px; animation: progressBar 1s 0.3s ease both; }
+ 
+  /* ===== WHATSAPP ===== */
+  .wa-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
+ 
+  .wa-card {
+    background: white; border-radius: var(--radius);
+    padding: 24px; border: 1px solid var(--border); box-shadow: var(--shadow);
+    animation: fadeUp 0.4s ease both;
+  }
+  .wa-card-icon { font-size: 28px; margin-bottom: 12px; }
+  .wa-card-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+  .wa-card-value { font-family: Arial, sans-serif; font-weight: 800; font-size: 1.7rem; }
+  .wa-card-sub { font-size: 0.78rem; color: var(--positive); font-weight: 600; margin-top: 4px; }
+  .wa-status-dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--positive); margin-right: 8px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+ 
+  .wa-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+ 
+  .msg-list { display: flex; flex-direction: column; gap: 12px; }
+  .msg-item {
+    padding: 16px 20px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--sidebar);
+    transition: all 0.2s; cursor: pointer;
+  }
+  .msg-item:hover { border-color: var(--primary); background: white; }
+  .msg-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .msg-item-name { font-weight: 700; font-size: 0.9rem; }
+  .msg-item-time { font-size: 0.76rem; color: var(--text-muted); }
+  .msg-item-phone { font-size: 0.76rem; color: var(--text-muted); margin-bottom: 6px; }
+  .msg-item-text { font-size: 0.85rem; color: var(--text-muted); }
+  .msg-badge { display: inline-block; padding: 3px 10px; border-radius: 50px; background: rgba(37,211,102,0.12); color: var(--accent); font-size: 0.72rem; font-weight: 600; margin-top: 8px; }
+ 
+  .config-list { display: flex; flex-direction: column; gap: 16px; }
+  .config-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; background: var(--sidebar); border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .config-item-left h4 { font-weight: 600; font-size: 0.9rem; margin-bottom: 3px; }
+  .config-item-left p { font-size: 0.78rem; color: var(--text-muted); }
+  .toggle {
+    width: 48px; height: 26px; border-radius: 50px;
+    background: var(--primary); position: relative; cursor: pointer;
+    transition: background 0.3s; flex-shrink: 0; border: none;
+  }
+  .toggle::after {
+    content: ''; position: absolute;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: white; top: 3px; right: 4px;
+    transition: right 0.3s; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .toggle.off { background: #D1D5DB; }
+  .toggle.off::after { right: 24px; }
+ 
+  .btn-disconnect {
+    width: 100%; padding: 14px; border-radius: 12px;
+    background: var(--danger); color: white;
+    font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.92rem;
+    border: none; cursor: pointer; margin-top: 16px;
+    transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-disconnect:hover { background: #DC2626; transform: translateY(-2px); }
+ 
+  /* ===== LOGIN PAGE ===== */
+  #login {
+    min-height: 100vh; display: none;
+    background: var(--bg);
+  }
+  #login.active { display: grid; grid-template-columns: 1fr 1fr; }
+ 
+  .login-left {
+    background: linear-gradient(135deg, var(--primary) 0%, #6D28D9 60%, #7C3AED 100%);
+    padding: 64px; display: flex; flex-direction: column; justify-content: space-between;
+    position: relative; overflow: hidden;
+  }
+  .login-left::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 20% 30%, rgba(255,255,255,0.12), transparent 60%),
+                radial-gradient(ellipse at 80% 70%, rgba(124,58,237,0.5), transparent 60%);
+  }
+  .login-left * { position: relative; }
+ 
+  .login-logo { display: flex; align-items: center; gap: 14px; }
+  .login-logo-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 22px; border: 1px solid rgba(255,255,255,0.3);
+  }
+  .login-logo-text { font-family: Arial, sans-serif; font-weight: 800; font-size: 1.3rem; color: white; }
+  .login-logo-sub { font-size: 0.76rem; color: rgba(255,255,255,0.7); margin-top: -2px; }
+ 
+  .login-hero { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px 0; }
+  .login-hero h2 {
+    font-family: Arial, sans-serif; font-weight: 800;
+    font-size: 2.4rem; color: white; line-height: 1.2; margin-bottom: 16px;
+  }
+  .login-hero p { color: rgba(255,255,255,0.75); font-size: 1rem; line-height: 1.7; max-width: 360px; }
+ 
+  .login-features { display: flex; flex-direction: column; gap: 16px; margin-top: 36px; }
+  .login-feature {
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(255,255,255,0.1); border-radius: 12px; padding: 16px 20px;
+    border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(8px);
+  }
+  .login-feature-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .login-feature h4 { font-weight: 700; font-size: 0.9rem; color: white; margin-bottom: 2px; }
+  .login-feature p { font-size: 0.78rem; color: rgba(255,255,255,0.7); }
+ 
+  .login-footer { color: rgba(255,255,255,0.5); font-size: 0.78rem; }
+ 
+  .login-right {
+    display: flex; align-items: center; justify-content: center;
+    padding: 64px; background: var(--bg);
+  }
+ 
+  .login-form-card {
+    width: 100%; max-width: 440px;
+    background: white; border-radius: 24px;
+    padding: 48px; box-shadow: var(--shadow-lg);
+    animation: fadeUp 0.5s ease;
+  }
+  .login-form-card h2 {
+    font-family: Arial, sans-serif; font-weight: 800;
+    font-size: 1.8rem; margin-bottom: 8px;
+  }
+  .login-form-card > p { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 36px; }
+ 
+  .form-group { margin-bottom: 20px; }
+  .form-label { font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; display: block; }
+  .input-wrap { position: relative; }
+  .input-wrap svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+  .form-input {
+    width: 100%; padding: 14px 16px 14px 48px;
+    border: 1.5px solid var(--border); border-radius: 12px;
+    background: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 0.92rem;
+    outline: none; transition: all 0.2s; color: var(--text);
+  }
+  .form-input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(91,79,232,0.08); }
+ 
+  .form-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .checkbox-wrap { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+  .checkbox-wrap input { accent-color: var(--primary); }
+  .link-text { color: var(--primary); font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .link-text:hover { text-decoration: underline; }
+ 
+  .btn-login {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white; border: none; border-radius: 12px;
+    font-family: Arial, sans-serif; font-weight: 700; font-size: 1rem;
+    cursor: pointer; transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(91,79,232,0.35);
+    margin-bottom: 24px;
+  }
+  .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(91,79,232,0.45); }
+  .btn-login:active { transform: translateY(0); }
+ 
+  .login-divider { text-align: center; color: var(--text-muted); font-size: 0.82rem; margin-bottom: 12px; }
+  .login-link-text { text-align: center; font-size: 0.85rem; color: var(--text-muted); }
+ 
+  /* Loading spinner */
+  .spinner {
+    display: none; width: 20px; height: 20px;
+    border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+ 
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding: 120px 24px 60px; }
+    .hero-visual { display: none; }
+    .features-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+    #login.active { grid-template-columns: 1fr; }
+    .login-left { display: none; }
+    .sidebar { display: none; }
+    .main-content { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+ 
+<!-- ===== LANDING PAGE ===== -->
+<div id="landing" class="page active">
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo" onclick="goTo('landing')">
+      <img src="logo.InSigth.png" class="sidebar-logo-icon">
+      <div>
+        <div class="nav-logo-text">InSight</div>
+        <div class="nav-logo-sub">Sistema de Avaliação</div>
+      </div>
+    </div>
+    <button class="nav-btn" onclick="goTo('login')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>
+      Sou Funcionário
+    </button>
+  </nav>
+ 
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-badge">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Sua opinião é muito importante!
+      </div>
+      <h1>Compartilhe sua<br><span>experiência</span></h1>
+      <p class="hero-sub">Ajude-nos a melhorar nossos serviços! Sua avaliação é fundamental para oferecermos a melhor experiência possível.</p>
+      <div class="hero-buttons">
+        <a href="https://wa.me/5511999999999?text=Olá%2C%20gostaria%20de%20deixar%20minha%20avaliação!" target="_blank" class="btn-whatsapp">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Fazer Avaliação pelo WhatsApp
+        </a>
+        <div class="btn-hint">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Rápido, fácil e seguro. Leva menos de 2 minutos!
+        </div>
+      </div>
+    </div>
+ 
+    <div class="hero-visual">
+      <div style="position:relative">
+        <div class="float-badge float-badge-1">
+          ✅ 435 avaliações este mês
+        </div>
+        <div class="mockup-card">
+          <div class="mockup-header">
+            <div class="mockup-icon">💬</div>
+            <div>
+              <div class="mockup-header-text">WhatsApp</div>
+              <div class="mockup-header-title">Avaliação Rápida</div>
+            </div>
+          </div>
+          <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;">Mensagem recebida:</div>
+          <div class="mockup-msg">"Ótimo atendimento! Muito satisfeito!"</div>
+          <div class="mockup-status">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Avaliação positiva registrada
+          </div>
+          <div class="mockup-progress">
+            <div class="mockup-bar" style="--w:35%"></div>
+            <div class="mockup-bar" style="--w:28%"></div>
+            <div class="mockup-bar" style="--w:22%"></div>
+            <div class="mockup-bar" style="--w:15%"></div>
+          </div>
+        </div>
+        <div class="float-badge float-badge-2">
+          📊 Satisfação: 56.3%
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <section class="features">
+    <div class="features-grid">
+      <div class="feature-card anim-fade-up">
+        <div class="feature-icon purple">⚡</div>
+        <h3>Rápido e Fácil</h3>
+        <p>Envie sua avaliação em segundos pelo WhatsApp, sem complicação.</p>
+      </div>
+      <div class="feature-card anim-fade-up">
+        <div class="feature-icon green">🛡️</div>
+        <h3>100% Seguro</h3>
+        <p>Seus dados são protegidos e sua privacidade é garantida.</p>
+      </div>
+      <div class="feature-card anim-fade-up">
+        <div class="feature-icon orange">📈</div>
+        <h3>Impacto Real</h3>
+        <p>Sua opinião nos ajuda a melhorar continuamente nossos serviços.</p>
+      </div>
+    </div>
+  </section>
+ 
+  <div class="cta-banner" style="max-width:1200px;margin:0 auto 80px;margin-left:48px;margin-right:48px;">
+    <h2>Pronto para compartilhar sua experiência?</h2>
+    <p>Clique no botão abaixo e envie sua avaliação agora mesmo pelo WhatsApp</p>
+    <button class="btn-cta-white" onclick="window.open('https://wa.me/5511999999999?text=Olá%2C%20gostaria%20de%20deixar%20minha%20avaliação!','_blank')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Avaliar Agora
+    </button>
+  </div>
+</div>
+ 
+<!-- ===== LOGIN PAGE ===== -->
+<div id="login" class="page">
+  <div class="login-left">
+    <div class="login-logo">
+      <div class="login-logo-icon">💬</div>
+      <div>
+        <div class="login-logo-text">InSight</div>
+        <div class="login-logo-sub">Análise Inteligente</div>
+      </div>
+    </div>
+    <div class="login-hero">
+      <h2>Portal do<br>Funcionário</h2>
+      <p>Acesse o sistema de monitoramento e análise de feedbacks dos clientes</p>
+      <div class="login-features">
+        <div class="login-feature">
+          <div class="login-feature-icon">📈</div>
+          <div>
+            <h4>Análise em Tempo Real</h4>
+            <p>Monitore a satisfação dos clientes instantaneamente</p>
+          </div>
+        </div>
+        <div class="login-feature">
+          <div class="login-feature-icon">📊</div>
+          <div>
+            <h4>Dashboards Interativos</h4>
+            <p>Visualize métricas e tendências com gráficos intuitivos</p>
+          </div>
+        </div>
+        <div class="login-feature">
+          <div class="login-feature-icon">👥</div>
+          <div>
+            <h4>Integração WhatsApp</h4>
+            <p>Receba feedbacks diretamente do WhatsApp Business</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="login-footer">© 2026 InSight. Todos os direitos reservados.</div>
+  </div>
+ 
+  <div class="login-right">
+    <div class="login-form-card">
+      <h2>Bem-vindo de volta!</h2>
+      <p>Faça login para acessar o sistema</p>
+ 
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <div class="input-wrap">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+          <input type="email" class="form-input" id="loginEmail" placeholder="seu@email.com" value="admin@InSight.com">
+        </div>
+      </div>
+ 
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <div class="input-wrap">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><circle cx="12" cy="16" r="1"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <input type="password" class="form-input" id="loginPass" placeholder="••••••••" value="12345678">
+        </div>
+      </div>
+ 
+      <div class="form-row">
+        <label class="checkbox-wrap">
+          <input type="checkbox" checked> Lembrar-me
+        </label>
+        <a href="#" class="link-text">Esqueceu a senha?</a>
+      </div>
+ 
+      <button class="btn-login" id="loginBtn" onclick="doLogin()">
+        <span id="loginBtnText">Entrar no Sistema</span>
+        <div class="spinner" id="loginSpinner"></div>
+      </button>
+ 
+      <div class="login-divider">Primeiro acesso? <a href="#" class="link-text">Solicite suas credenciais</a></div>
+      <div class="login-link-text" style="margin-top:16px">
+        <a href="#" class="link-text" onclick="goTo('landing')">← Voltar para a página inicial</a>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ===== APP ===== -->
+<div id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+     <img src="logo.InSigth.png" class="sidebar-logo-icon">
+      <div>
+        <div class="sidebar-logo-text">Feedbacks</div>
+        <div class="sidebar-logo-sub">Sistema de Análise</div>
+      </div>
+    </div>
+ 
+    <nav>
+      <button class="nav-item active" id="nav-dashboard" onclick="showSection('dashboard')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" id="nav-feedbacks" onclick="showSection('feedbacks')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Feedbacks
+        <span class="nav-item-badge">67</span>
+      </button>
+      <button class="nav-item" id="nav-whatsapp" onclick="showSection('whatsapp')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.96a16 16 0 006.13 6.13l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        WhatsApp
+      </button>
+    </nav>
+ 
+    <div class="sidebar-bottom">
+      <button class="btn-logout" onclick="goTo('landing')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </button>
+    </div>
+  </aside>
+ 
+  <main class="main-content">
+ 
+    <!-- DASHBOARD -->
+    <div class="sub-page active" id="section-dashboard">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Visão geral dos feedbacks dos clientes</p>
+      </div>
+ 
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon" style="background:rgba(91,79,232,0.10);">💬</div>
+            <div class="stat-trend trend-up">↑ +12%</div>
+          </div>
+          <div class="stat-value">435</div>
+          <div class="stat-label">Total de Feedbacks</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon" style="background:rgba(34,197,94,0.10);">📈</div>
+            <div class="stat-trend trend-up">↑ +5.2%</div>
+          </div>
+          <div class="stat-value">56.3%</div>
+          <div class="stat-label">Satisfação</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon" style="background:rgba(245,158,11,0.10);">👥</div>
+            <div class="stat-trend trend-up">↑ +8%</div>
+          </div>
+          <div class="stat-value">1.247</div>
+          <div class="stat-label">Clientes Ativos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon" style="background:rgba(239,68,68,0.10);">⚠️</div>
+            <div class="stat-trend trend-down">↓ -3%</div>
+          </div>
+          <div class="stat-value">67</div>
+          <div class="stat-label">Feedbacks Negativos</div>
+        </div>
+      </div>
+ 
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>Distribuição de Sentimentos</h3>
+          <div class="donut-wrap">
+            <svg class="donut-svg" width="200" height="200" viewBox="0 0 200 200">
+              <!-- Positivo 56% -->
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#22C55E" stroke-width="32"
+                stroke-dasharray="246.9 441" stroke-dashoffset="110.7" transform="rotate(-90 100 100)"/>
+              <!-- Neutro 28% -->
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#F59E0B" stroke-width="32"
+                stroke-dasharray="123.5 441" stroke-dashoffset="-136.2" transform="rotate(-90 100 100)"/>
+              <!-- Negativo 15% -->
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#EF4444" stroke-width="32"
+                stroke-dasharray="66.2 441" stroke-dashoffset="-259.7" transform="rotate(-90 100 100)"/>
+              <text x="100" y="94" text-anchor="middle" font-family="Syne" font-weight="800" font-size="22" fill="#0F0F1A">56%</text>
+              <text x="100" y="114" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#6B7280">Positivo</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#22C55E"></div> Positivo: 245</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div> Neutro: 123</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#EF4444"></div> Negativo: 67</div>
+            </div>
+          </div>
+        </div>
+ 
+        <div class="chart-card">
+          <h3>Feedbacks por Dia da Semana</h3>
+          <div class="bar-chart">
+            <div class="bar-group">
+              <div class="bar" style="height:75%;background:#EF4444;--w:75%"></div>
+              <div class="bar-label">Seg</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height:88%;background:#EF4444;--w:88%"></div>
+              <div class="bar-label">Ter</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height:60%;background:#EF4444;--w:60%"></div>
+              <div class="bar-label">Qua</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height:78%;background:#EF4444;--w:78%"></div>
+              <div class="bar-label">Qui</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height:72%;background:#EF4444;--w:72%"></div>
+              <div class="bar-label">Sex</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height:55%;background:#EF4444;--w:55%"></div>
+              <div class="bar-label">Sáb</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height:48%;background:#EF4444;--w:48%"></div>
+              <div class="bar-label">Dom</div>
+            </div>
+          </div>
+          <div class="donut-legend" style="margin-top:4px">
+            <div class="legend-item"><div class="legend-dot" style="background:#22C55E"></div> Positivo</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div> Neutro</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#EF4444"></div> Negativo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- FEEDBACKS -->
+    <div class="sub-page" id="section-feedbacks">
+      <div class="page-header">
+        <h1>Feedbacks dos Clientes</h1>
+        <p>Visualize e analise todos os feedbacks recebidos</p>
+      </div>
+ 
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" placeholder="Buscar por cliente ou mensagem..." oninput="filterFeedbacks(this.value)">
+        </div>
+        <button class="btn-filter">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filtros
+        </button>
+      </div>
+ 
+      <div class="feedback-list" id="feedbackList"></div>
+    </div>
+ 
+    <!-- FEEDBACK DETAIL -->
+    <div class="sub-page" id="section-detail">
+      <button class="detail-back" onclick="showSection('feedbacks')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+        Voltar para Feedbacks
+      </button>
+ 
+      <div class="page-header" style="margin-bottom:20px">
+        <h1 id="detail-name">João Silva</h1>
+        <p id="detail-date">2026-04-22 14:30</p>
+      </div>
+ 
+      <div class="detail-grid">
+        <div class="detail-card">
+          <h3>Mensagem do Cliente</h3>
+          <div class="detail-message-box" id="detail-msg"></div>
+          <div class="detail-meta">
+            <div class="detail-meta-row">
+              <span class="detail-meta-label">Tipo</span>
+              <span class="detail-meta-value" id="detail-type"></span>
+            </div>
+            <div class="detail-meta-row">
+              <span class="detail-meta-label">Canal</span>
+              <span class="detail-meta-value">WhatsApp</span>
+            </div>
+            <div class="detail-meta-row">
+              <span class="detail-meta-label">Data/Hora</span>
+              <span class="detail-meta-value" id="detail-date2"></span>
+            </div>
+            <div class="detail-meta-row">
+              <span class="detail-meta-label">Sentimento</span>
+              <span class="detail-meta-value" id="detail-sent-label"></span>
+            </div>
+          </div>
+        </div>
+ 
+        <div class="detail-card">
+          <h3>Análise de Sentimento</h3>
+          <div class="sentiment-big">
+            <div class="sentiment-emoji" id="detail-emoji"></div>
+            <div class="sentiment-label" id="detail-sent-title"></div>
+          </div>
+          <div class="confidence-bar-wrap">
+            <div class="confidence-label"><span id="detail-bar-label"></span><span id="detail-bar-pct"></span></div>
+            <div class="confidence-bar-bg">
+              <div class="confidence-bar-fill" id="detail-bar-fill" style="--w:80%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- WHATSAPP -->
+    <div class="sub-page" id="section-whatsapp">
+      <div class="page-header">
+        <h1>Integração WhatsApp</h1>
+        <p>Configure e monitore a conexão com o WhatsApp Business</p>
+      </div>
+ 
+      <div class="wa-stats">
+        <div class="wa-card">
+          <div class="wa-card-icon">✅</div>
+          <div class="wa-card-label">Status da Conexão</div>
+          <div class="wa-card-value"><span class="wa-status-dot"></span>Conectado</div>
+          <div class="wa-card-sub" style="color:var(--text-muted)">Última sinc: há 2 minutos</div>
+        </div>
+        <div class="wa-card">
+          <div class="wa-card-icon">💬</div>
+          <div class="wa-card-label">Mensagens Hoje</div>
+          <div class="wa-card-value">127</div>
+          <div class="wa-card-sub">+23% vs ontem</div>
+        </div>
+        <div class="wa-card">
+          <div class="wa-card-icon">📱</div>
+          <div class="wa-card-label">Dispositivo</div>
+          <div class="wa-card-value" style="font-size:1.3rem"> Samsung Galaxy S22</div>
+          <div class="wa-card-sub" style="color:var(--text-muted)">+55 11 98765-4321</div>
+        </div>
+      </div>
+ 
+      <div class="wa-bottom">
+        <div class="wa-card">
+          <h3 style="font-family:'Syne';font-weight:700;margin-bottom:16px;font-size:1rem">Mensagens Recentes</h3>
+          <div class="msg-list">
+            <div class="msg-item">
+              <div class="msg-item-header">
+                <span class="msg-item-name">João Silva</span>
+                <span class="msg-item-time">14:30</span>
+              </div>
+              <div class="msg-item-phone">+55 11 98765-4321</div>
+              <div class="msg-item-text">Olá, gostaria de saber sobre o status do meu pedido</div>
+              <div class="msg-badge">Recebida</div>
+            </div>
+            <div class="msg-item">
+              <div class="msg-item-header">
+                <span class="msg-item-name">Maria Santos</span>
+                <span class="msg-item-time">13:15</span>
+              </div>
+              <div class="msg-item-phone">+55 21 91234-5678</div>
+              <div class="msg-item-text">O produto chegou com defeito</div>
+              <div class="msg-badge">Recebida</div>
+            </div>
+            <div class="msg-item">
+              <div class="msg-item-header">
+                <span class="msg-item-name">Carlos Oliveira</span>
+                <span class="msg-item-time">12:00</span>
+              </div>
+              <div class="msg-item-phone">+55 31 99876-5432</div>
+              <div class="msg-item-text">Muito obrigado pelo atendimento!</div>
+              <div class="msg-badge">Recebida</div>
+            </div>
+          </div>
+        </div>
+ 
+        <div class="wa-card">
+          <h3 style="font-family:'Syne';font-weight:700;margin-bottom:16px;font-size:1rem">Configurações</h3>
+          <div class="config-list">
+            <div class="config-item">
+              <div class="config-item-left">
+                <h4>Resposta Automática</h4>
+                <p>Enviar mensagem de boas-vindas</p>
+              </div>
+              <button class="toggle" onclick="this.classList.toggle('off')"></button>
+            </div>
+            <div class="config-item">
+              <div class="config-item-left">
+                <h4>Análise de Sentimento</h4>
+                <p>Classificar automaticamente feedbacks</p>
+              </div>
+              <button class="toggle" onclick="this.classList.toggle('off')"></button>
+            </div>
+            <div class="config-item">
+              <div class="config-item-left">
+                <h4>Conversão de Áudio</h4>
+                <p>Transcrever mensagens de voz</p>
+              </div>
+              <button class="toggle" onclick="this.classList.toggle('off')"></button>
+            </div>
+            <div class="config-item">
+              <div class="config-item-left">
+                <h4>Notificações</h4>
+                <p>Alertas de feedbacks negativos</p>
+              </div>
+              <button class="toggle" onclick="this.classList.toggle('off')"></button>
+            </div>
+          </div>
+          <button class="btn-disconnect">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            Desconectar WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+ 
+  </main>
+</div>
+ 
+<script>
+// ===== DATA =====
+const feedbacks = [
+  { id:1, name:'João Silva', sentiment:'Positivo', type:'texto', msg:'Atendimento excelente! Muito satisfeito com o serviço prestado.', date:'2026-04-22 14:30', emoji:'😊', confidence:92, color:'#22C55E' },
+  { id:2, name:'Maria Santos', sentiment:'Negativo', type:'áudio', msg:'O produto chegou com defeito e o suporte não respondeu.', date:'2026-04-22 13:15', emoji:'😞', confidence:87, color:'#EF4444' },
+  { id:3, name:'Carlos Oliveira', sentiment:'Neutro', type:'texto', msg:'Entrega dentro do prazo, produto conforme o esperado.', date:'2026-04-22 12:00', emoji:'😐', confidence:74, color:'#F59E0B' },
+  { id:4, name:'Ana Paula', sentiment:'Positivo', type:'áudio', msg:'Equipe muito atenciosa, recomendo para todos!', date:'2026-04-22 11:45', emoji:'😊', confidence:95, color:'#22C55E' },
+  { id:5, name:'Pedro Costa', sentiment:'Neutro', type:'texto', msg:'Esperava mais pelo preço cobrado.', date:'2026-04-22 10:20', emoji:'😐', confidence:68, color:'#F59E0B' },
+  { id:6, name:'Lucia Ferreira', sentiment:'Positivo', type:'texto', msg:'Serviço impecável, superou minhas expectativas!', date:'2026-04-22 09:55', emoji:'😊', confidence:97, color:'#22C55E' },
+  { id:7, name:'Rafael Mendes', sentiment:'Negativo', type:'áudio', msg:'Demorou muito para ser atendido e o problema não foi resolvido.', date:'2026-04-22 09:10', emoji:'😞', confidence:82, color:'#EF4444' },
+];
+ 
+const sentimentEmoji = { Positivo:'😊', Neutro:'😐', Negativo:'😞' };
+const sentimentIcon = { Positivo:'🟢', Neutro:'🟡', Negativo:'🔴' };
+ 
+// ===== NAV =====
+function goTo(page) {
+  document.querySelectorAll('.page, #login, #app').forEach(p => {
+    p.classList.remove('active');
+    if (p.id === 'app') p.style.display = 'none';
+    if (p.id === 'login') p.style.display = 'none';
+  });
+ 
+  if (page === 'landing') {
+    document.getElementById('landing').style.display = 'block';
+    document.getElementById('landing').classList.add('active');
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login').style.display = 'none';
+  } else if (page === 'login') {
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('login').style.display = 'grid';
+    document.getElementById('login').classList.add('active');
+    document.getElementById('app').style.display = 'none';
+  } else if (page === 'app') {
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('app').classList.add('active');
+    renderFeedbacks(feedbacks);
+  }
+}
+ 
+function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  const txt = document.getElementById('loginBtnText');
+  const spin = document.getElementById('loginSpinner');
+  txt.style.display = 'none';
+  spin.style.display = 'block';
+  btn.disabled = true;
+  setTimeout(() => {
+    goTo('app');
+    txt.style.display = 'block';
+    spin.style.display = 'none';
+    btn.disabled = false;
+  }, 1200);
+}
+ 
+function showSection(name) {
+  document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  const navEl = document.getElementById('nav-' + name);
+  if (navEl) navEl.classList.add('active');
+}
+ 
+// ===== FEEDBACKS =====
+function renderFeedbacks(list) {
+  const container = document.getElementById('feedbackList');
+  container.innerHTML = '';
+  list.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'feedback-item';
+    div.style.animationDelay = (i * 0.06) + 's';
+    div.innerHTML = `
+      <div class="feedback-item-left">
+        <div class="feedback-item-name">
+          ${f.name}
+          <span class="tag tag-${f.sentiment.toLowerCase()}">${f.sentiment}</span>
+          <span class="tag tag-type">${f.type}</span>
+        </div>
+        <div class="feedback-msg">${f.msg}</div>
+        <div class="feedback-date">${f.date}</div>
+      </div>
+      <div class="sentiment-icon">${f.emoji}</div>
+    `;
+    div.onclick = () => showDetail(f);
+    container.appendChild(div);
+  });
+}
+ 
+function filterFeedbacks(q) {
+  const filtered = feedbacks.filter(f =>
+    f.name.toLowerCase().includes(q.toLowerCase()) ||
+    f.msg.toLowerCase().includes(q.toLowerCase())
+  );
+  renderFeedbacks(filtered);
+}
+ 
+function showDetail(f) {
+  document.getElementById('detail-name').textContent = f.name;
+  document.getElementById('detail-date').textContent = f.date;
+  document.getElementById('detail-date2').textContent = f.date;
+  document.getElementById('detail-msg').textContent = '"' + f.msg + '"';
+  document.getElementById('detail-type').textContent = f.type.charAt(0).toUpperCase() + f.type.slice(1);
+  document.getElementById('detail-emoji').textContent = f.emoji;
+  document.getElementById('detail-sent-title').textContent = f.sentiment;
+  document.getElementById('detail-sent-title').style.color = f.color;
+  document.getElementById('detail-sent-label').innerHTML = `<span class="tag tag-${f.sentiment.toLowerCase()}">${f.sentiment}</span>`;
+  document.getElementById('detail-bar-label').textContent = 'Confiança da análise';
+  document.getElementById('detail-bar-pct').textContent = f.confidence + '%';
+  const bar = document.getElementById('detail-bar-fill');
+  bar.style.setProperty('--w', f.confidence + '%');
+  bar.style.background = f.color;
+  bar.style.width = f.confidence + '%';
+ 
+  document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-detail').classList.add('active');
+  document.getElementById('nav-feedbacks').classList.add('active');
+}
+ 
+// ===== SCROLL =====
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+});
+ 
+// Init
+goTo('landing');
+</script>
+</body>
+</html>
